@@ -1,0 +1,58 @@
+
+.chat-message {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+}
+.received {
+    background-color: #f8f9fa;
+}
+.sent {
+    background-color: #0d6efd;
+    color: white;
+    text-align: right;
+}
+.chat-input {
+    padding: 0.5rem;
+}
+.sidebar {
+    background-color: #f0f0f0;
+    height: 100vh;
+    overflow-y: auto;
+}
+.new-chat-container {
+    text-align: center; /* Centers the button and input field within the div */
+}
+
+.btn-primary {
+    margin-bottom: 10px; /* Adds space between the button and the input field */
+}
+
+.form-control {
+    margin-top: 10px; /* Adds space above the input field if needed */
+}
+
+.nav-link {
+    cursor: pointer; /* Makes the entire nav item clickable, improving usability */
+}
+.message-box {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.message-box.sent {
+    background-color: #E1F5FE;
+    text-align: right;
+}
+
+.message-box.received {
+    background-color: #FFF9C4;
+    text-align: left;
+}
+
+.timestamp {
+    display: block;
+    font-size: 0.75em;
+    color: #666;
+}

@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leoni ChatBot</title>
+    <!-- Link to Bootstrap CSS for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Optional: Link to your custom CSS -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Sidebar for old conversations or additional controls -->
+            <div class="col-md-4 col-lg-3 bg-light border-right">
+                <!-- New chat button and input field container -->
+                <div class="new-chat-container p-3">
+                    <button id="startNewChat" class="btn btn-primary w-100 mb-2">New Chat</button>
+                    
+                </div>
+                <!-- List of existing chats -->
+                <ul class="nav flex-column">
+                    <?php foreach ($conversations as $conversation) : ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-conversation-id="<?php echo $conversation['conversation_id']; ?>">
+                            <?php echo htmlspecialchars($conversation['title']); ?>
+                        </a>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            
+            <!-- Main chat area -->
+            <div class="col-md-8 col-lg-9">
+                <!-- Chatbot banner image -->
+                <div class="text-center mb-4">
+                    <img src="image/leobot.png" alt="leobot" width="200" height="80">
+                </div>
+                
+                <!-- Conversation area -->
+                <div id="conversation" class="border rounded p-3 mb-4" style="height: 400px; overflow-y: scroll;">
+                    <div class="message received p-2 mb-2 bg-light rounded">Hello! How can I assist you?</div>
+                </div>
+
+                <!-- Search and message input area -->
+                <div id="searchContainer" class="mb-4">
+                    <form id="searchForm" class="input-group">
+                        <input type="text" id="searchQuery" class="form-control" placeholder="Type your query">
+                        <input type="hidden" id="userId" value="1">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                    <ul class="dropdown list-group mt-2" id="searchResults"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle AJAX and message functionality -->
+    <script>
+        var currentConversationId;
+        var userId = '2';
+       var username = 'douneb';
+       var cin =123645678;
+
+        $(document).ready(function(){
+
+            fetchConversations();
+            $('#searchQuery').keyup(function(){
+                var searchQuery = $(this).val(); 
+                if (searchQuery.length > 2){
+                    $.ajax({
+                        type: 'GET',
+                        url: 'search.php', 
+                        data: { search_query: searchQuery }, 
+                        success: function(response){
+                            $('#searchResults').html(response); 
+                        }
+                    });
+                }
+            });
+
+            $('#searchResults').on('click', 'a', function(e){
+                e.preventDefault(); 
+                var selectedQuestion = $(this).text(); 
+                $.ajax({
+                    type: 'POST',
+                    url: 'get_answer.php', 
+                    data: { question: selectedQuestion }, 
+                    success: function(response){
+                        addMessage(selectedQuestion, 'sent'); 
+                        addMessage(response, 'received'); 
+
+                        $.ajax({
+                             type: 'POST',
+                             url: 'save_conversation.php', 
+                             data: {
+                                  question: selectedQuestion,
+                                  response: response
+                            },
+                            success: function(data) {
+                                 console.log('Conversation and messages saved', data);
+                            },
+                            error: function(error) {
+                                console.error('Failed to save conversation', error);
+                            }
+                        });
+                    }
+                });
+
+            });
+
+            $(document).ready(function() {
+    var firstSend = true; // Flag to check if it's the first send
+    var conversationId = null; // To store the conversation ID
+
+    $('#searchForm').on('submit', function(e){
+        e.preventDefault(); // Prevent form from refreshing the page
+        var searchQuery = $('#searchQuery').val(); // Get the user's query
+
+        if (searchQuery.length > 1){
+            $.ajax({
+                type: 'POST',
+                url: 'get_answer.php', 
+                data: { question: searchQuery },
+                success: function(response){
+                    addMessage(searchQuery, 'sent');
+                    addMessage(response, 'received');
+
+                    var ajaxUrl = 'save_conversation.php';
+                    var ajaxData = {
+                        userId: userId,
+                        question: searchQuery,
+                        response: response
+                    };
+
+                    if (firstSend) {
+                        // If it's the first send, save the conversation
+                    } else {
+                        ajaxData.conversationId = conversationId; // Use the existing conversation ID
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: ajaxUrl,
+                        data: ajaxData,
+                        success: function(data) {
+                            console.log('Interaction saved', data);
+                            var result = JSON.parse(data);
+                            if (firstSend) {
+                                conversationId = result.conversationId; // Store the conversation ID returned from the server
+                                firstSend = false; // Update the flag after the first send
+                            }
+                        },
+                        error: function(error) {
+                            console.error('Failed to save interaction', error);
+                        }
+                    });
+                },
+                error: function(){
+                    addMessage('An error occurred. Please try again later.', 'received');
+                }
+            });
+        }
+    });
+});
+
+
+
+
+            function addMessage(message, type) {
+                $('#conversation').append('<div class="message ' + type + ' p-2 mb-2 ' + (type === 'received' ? 'bg-light' : 'bg-primary text-white') + ' rounded">' + message + '</div>');
+                $('#conversation').scrollTop($('#conversation')[0].scrollHeight); 
+            }
+        });
+        $(document).ready(function() {
+    $('#startNewChat').click(function() {
+        location.reload(); // This will reload the page
+    });
+});
+
+
+       $(document).on('click', '.nav-link', function(e) {
+          e.preventDefault();
+         var conversationId = $(this).data('conversation-id');
+        $.ajax({
+           type: 'POST',
+           url: 'fetch_messages.php',
+           data: { conversation_id: conversationId },
+           success: function(response) {
+              $('#conversation').html(response); // Assuming #conversation is your chat display area
+           },
+           error: function() {
+              alert('Failed to fetch messages.');
+          }
+       });
+});
+
+
+// Fetch conversations when page loads
+
+
+// Fetch conversations function
+function fetchConversations() {
+        $.ajax({
+            type: 'POST',
+            url: 'fetch_conversation.php',
+            data: { userId: userId },
+            success: function(data) {
+                var conversations = JSON.parse(data);
+                var $list = $('.nav.flex-column');
+                $list.empty(); // Clear existing entries
+
+                conversations.forEach(function(conv) {
+                    $list.append('<li class="nav-item"><a class="nav-link" href="#" data-conversation-id="' + conv.conversationId + '">' + conv.title + '</a></li>');
+                });
+            },
+            error: function() {
+                alert('Failed to fetch conversations');
+            }
+        });
+    }
+
+    // Handle clicks on conversation links
+    $('.nav.flex-column').on('click', '.nav-link', function(e) {
+        e.preventDefault();
+        currentConversationId = $(this).data('conversation-id');
+        console.log('Current Conversation ID:', currentConversationId);
+        fetchMessages(currentConversationId);
+    });
+
+    function fetchMessages(conversationId) {
+        $.ajax({
+            type: 'POST',
+            url: 'fetch_messages.php',
+            data: { conversation_id: conversationId },
+            success: function(response) {
+                $('#conversation').html(response);
+            },
+            error: function() {
+                alert('Failed to fetch messages.');
+            }
+        });
+    }
+
+
+
+
+    </script>
+</body>
+</html>

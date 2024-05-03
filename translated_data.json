@@ -1,0 +1,16 @@
+[
+    {
+        "fr": {
+            "question": "Quelles sont les marques de voitures qui travaillent avec Leoni ?",
+            "answer": "Certaines des marques automobiles avec lesquelles Leoni travaille incluent BMW, Audi, Volkswagen, Mercedes-Benz et bien d'autres encore."
+        },
+        "ar": {
+            "question": "ما هي ماركات السيارات التي تعمل مع ليوني ؟",
+            "answer": "تشمل بعض العلامات التجارية للسيارات التي تعمل معها ليوني بي إم دبليو وأودي وفولكس واجن ومرسيدس بنز وغيرها الكثير."
+        },
+        "en": {
+            "question": "Which car brands work with Leoni?",
+            "answer": "Some of the automotive brands Leoni works with include BMW, Audi, Volkswagen, Mercedes-Benz and many more."
+        }
+    }
+]
