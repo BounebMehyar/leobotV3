@@ -1,6 +1,6 @@
 <?php
 $userId = isset($_POST['userId']) ? $_POST['userId'] : 'unknown_user';
-$conversationId = isset($_POST['conversationId']) ? $_POST['conversationId'] : null;
+$conversationId = isset($_POST['currentConversationId']) ? $_POST['currentConversationId'] : null;
 
 $question = $_POST['question'];
 $response = $_POST['response'];
@@ -44,4 +44,4 @@ $jsonFilePath = $directory . '/' . $conversationId . '.json';
 file_put_contents($jsonFilePath, json_encode($conversationData, JSON_PRETTY_PRINT));
 
 echo json_encode(['status' => 'success', 'message' => 'Conversation saved successfully', 'conversationId' => $conversationId]);
-?>
+

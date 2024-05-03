@@ -1,25 +1,30 @@
 <?php
-require 'db.php'; // Include your database connection
+$conversationId = isset($_POST['currentConversationId']) ? $_POST['currentConversationId'] : '';
+$directory = 'conversations';
+$filePath = $directory . '/' . $conversationId . '.json'; // Correct usage of the forward slash
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['conversation_id'])) {
-    $conversationId = $_POST['conversation_id'];
+// Check if the file exists
+if (file_exists($filePath)) {
+    $jsonData = file_get_contents($filePath);
+    $conversationData = json_decode($jsonData, true);
 
-    $stmt = $pdo->prepare("SELECT content, timestamp, role FROM messages WHERE conversation = :conversation_id ORDER BY timestamp ASC");
-    $stmt->execute([':conversation_id' => $conversationId]);
+    // Start with the initial greeting
+    $responseHtml = '<div class="message received p-2 mb-2 bg-light rounded">Hello! How can I assist you?</div>';
 
-    $messages = $stmt->fetchAll();
-
-    // Prepare HTML output to send back to the client
-    $output = '';
-    foreach ($messages as $message) {
-        $roleClass = htmlspecialchars($message['role']); // "sent" or "received"
-        $output .= '<div class="message-box ' . $roleClass . '">';
-        $output .= '<p>' . htmlspecialchars($message['content']) . '</p>';
-        $output .= '<span class="timestamp">' . $message['timestamp'] . '</span>';
-        $output .= '</div>';
+    if (isset($conversationData['interactions'])) {
+        foreach ($conversationData['interactions'] as $interaction) {
+            // For each interaction, format as HTML
+            $questionHtml = '<div class="message sent p-2 mb-2 bg-primary text-white rounded">' . htmlspecialchars($interaction['question']) . '</div>';
+            $responseHtml .= $questionHtml;  // Append question immediately
+            $responseHtml .= '<div class="message received p-2 mb-2 bg-light rounded">' . htmlspecialchars($interaction['response']) . '</div>';  // Append response immediately after question
+        }
+    } else {
+        $responseHtml .= '<div class="message received p-2 mb-2 bg-light rounded">No interactions found in this conversation.</div>';
     }
-
-    echo $output;
-    exit; 
+} else {
+    $responseHtml = '<div class="message received p-2 mb-2 bg-light rounded">Conversation file not found.</div>';
 }
-?>
+
+// Output the response HTML
+echo $responseHtml;
+

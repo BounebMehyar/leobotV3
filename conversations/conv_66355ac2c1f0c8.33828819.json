@@ -1,0 +1,15 @@
+{
+    "conversationId": "conv_66355ac2c1f0c8.33828819",
+    "userId": "2",
+    "interactions": [
+        {
+            "question": "Which car brands work with Leoni?",
+            "response": "Some of the automotive brands Leoni works with include BMW, Audi, Volkswagen, Mercedes-Benz and many more."
+        },
+        {
+            "question": "Quelles sont les marques de voitures qui travaillent avec Leoni ?",
+            "response": "Certaines des marques automobiles avec lesquelles Leoni travaille incluent BMW, Audi, Volkswagen, Mercedes-Benz et bien d'autres encore."
+        }
+    ],
+    "timestamp": 1714772674
+}
