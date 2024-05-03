@@ -16,6 +16,20 @@
         <div class="row">
             <!-- Sidebar for old conversations or additional controls -->
             <div class="col-md-4 col-lg-3 bg-light border-right">
+                <div class="user-data-container p-3 mb-3">
+                    <div class="row align-items-center">
+                        <!-- Photo on the left -->
+                        <div class="col-4 text-left">
+                            <img src="path/to/user_photo.jpg" alt="User Photo" class="rounded-circle" width="50" height="50">
+                        </div>
+                        
+                        <!-- Name and CIN on the right -->
+                        <div class="col-8 text-left">
+                            <h5 id="userName"></h5>
+                            <p id="userCIN">CIN:</p>
+                        </div>
+                    </div>
+                </div>
                 <!-- New chat button and input field container -->
                 <div class="new-chat-container p-3">
                     <button id="startNewChat" class="btn btn-primary w-100 mb-2">New Chat</button>
@@ -34,7 +48,7 @@
             </div>
             
             <!-- Main chat area -->
-            <div class="col-md-8 col-lg-9">
+            <div class="col-md-11 col-lg-9">
                 <!-- Chatbot banner image -->
                 <div class="text-center mb-4">
                     <img src="image/leobot.png" alt="leobot" width="200" height="80">
@@ -49,7 +63,6 @@
                 <div id="searchContainer" class="mb-4">
                     <form id="searchForm" class="input-group">
                         <input type="text" id="searchQuery" class="form-control" placeholder="Type your query">
-                        <input type="hidden" id="userId" value="1">
                         <button type="submit" class="btn btn-primary">Send</button>
                     </form>
                     <ul class="dropdown list-group mt-2" id="searchResults"></ul>
@@ -60,210 +73,221 @@
 
     <!-- JavaScript to handle AJAX and message functionality -->
     <script>
-        var currentConversationId;
-        var userId = '2';
-       var username = 'douneb';
+       var currentConversationId;
+       var userId = '2';
+       var username = 'mehyar bouneb';
+       var photoUrl= 'image/userphoto.png';
        var cin =123645678;
        var firstSend = true; // Flag to check if it's the first send
        var conversationId = null; // To store the conversation ID
+
        $(document).ready(function() {
-    fetchConversations();
+          fetchConversations();
+          const userNameElement = document.getElementById('userName');
+          userNameElement.textContent = username;
+          const userCINElement = document.getElementById('userCIN');
+          userCINElement.textContent = 'CIN: ' + cin;
+          const userPhotoElement = document.querySelector('img[alt="User Photo"]');
+          userPhotoElement.src = photoUrl;
+          userPhotoElement.alt = 'Photo of ' + name;
 
-    $('#searchQuery').keyup(function() {
-        var searchQuery = $(this).val();
-        if (searchQuery.length > 2) {
-            $.ajax({
-                type: 'GET',
-                url: 'search.php',
-                data: { search_query: searchQuery },
-                success: function(response) {
-                    $('#searchResults').html(response);
-                }
-            });
-        }
-    });
-
-    $('#searchResults').on('click', 'a', function(e) {
-        e.preventDefault();
-        var selectedQuestion = $(this).text();
-
-        $.ajax({
-            type: 'POST',
-            url: 'get_answer.php',
-            data: { question: selectedQuestion },
-            success: function(response) {
-                addMessage(selectedQuestion, 'sent');
-                addMessage(response, 'received');
-
-                var ajaxData = {
-                    userId: userId,
-                    currentConversationId:currentConversationId,        
-                    question: selectedQuestion,
-                    response: response
-                };
-
-                if (!firstSend) {
-                    ajaxData.conversationId = conversationId; // Use the existing conversation ID
-                }
-
-                $.ajax({
-                    type: 'POST',
-                    url: 'save_conversation.php',
-                    data: ajaxData,
-                    success: function(data) {
-                        console.log('Conversation and messages saved', data);
-                        if (firstSend) {
-                            var result = JSON.parse(data);
-                            conversationId = result.conversationId; // Store the conversation ID returned from the server
-                            firstSend = false; // Update the flag after the first send
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Failed to save conversation', error);
+                $('#searchQuery').keyup(function() {
+                    var searchQuery = $(this).val();
+                    if (searchQuery.length > 2) {
+                        $.ajax({
+                            type: 'GET',
+                            url: 'search.php',
+                            data: { search_query: searchQuery },
+                            success: function(response) {
+                                $('#searchResults').html(response);
+                            }
+                        });
                     }
                 });
-            },
-            error: function() {
-                addMessage('An error occurred. Please try again later.', 'received');
-            }
-        });
-    });
 
-
-            $(document).ready(function() {
-   
-
-    $('#searchForm').on('submit', function(e){
-        e.preventDefault(); // Prevent form from refreshing the page
-        var searchQuery = $('#searchQuery').val(); // Get the user's query
-
-        if (searchQuery.length > 1){
-            $.ajax({
-                type: 'POST',
-                url: 'get_answer.php', 
-                data: { question: searchQuery },
-                success: function(response){
-                    addMessage(searchQuery, 'sent');
-                    addMessage(response, 'received');
-                   
-
-                    var ajaxUrl = 'save_conversation.php';
-                    var ajaxData = {
-                        currentConversationId:currentConversationId,
-                        userId: userId,
-                        question: searchQuery,
-                        response: response
-                    };
-                    console.log(currentConversationId);
-
-                    if (firstSend) {
-                        // If it's the first send, save the conversation
-                    } else {
-                        ajaxData.currentConversationId= currentConversationId; // Use the existing conversation ID
-                    }
+                $('#searchResults').on('click', 'a', function(e) {
+                    e.preventDefault();
+                    var selectedQuestion = $(this).text();
 
                     $.ajax({
                         type: 'POST',
-                        url: ajaxUrl,
-                        data: ajaxData,
-                        success: function(data) {
-                            console.log('Interaction saved', data);
-                            var result = JSON.parse(data);
-                            if (firstSend) {
-                                currentConversationId = result.currentConversationId; // Store the conversation ID returned from the server
-                                firstSend = false; // Update the flag after the first send
+                        url: 'get_answer.php',
+                        data: { question: selectedQuestion },
+                        success: function(response) {
+                            addMessage(selectedQuestion, 'sent');
+                            addMessage(response, 'received');
+                            $('#searchQuery').val('');
+
+                            var ajaxData = {
+                                userId: userId,
+                                currentConversationId:currentConversationId,        
+                                question: selectedQuestion,
+                                response: response
+                            };
+
+                            if (!firstSend) {
+                                ajaxData.conversationId = conversationId; 
                             }
+
+                            $.ajax({
+                                type: 'POST',
+                                url: 'save_conversation.php',
+                                data: ajaxData,
+                                success: function(data) {
+                                    console.log('Conversation and messages saved', data);
+                                    if (firstSend) {
+                                        var result = JSON.parse(data);
+                                        conversationId = result.conversationId; 
+                                        firstSend = false; 
+                                    }
+                                },
+                                error: function(error) {
+                                    console.error('Failed to save conversation', error);
+                                }
+                            });
                         },
-                        error: function(error) {
-                            console.error('Failed to save interaction', error);
+                        error: function() {
+                            addMessage('An error occurred. Please try again later.', 'received');
                         }
                     });
-                },
-                error: function(){
-                    addMessage('An error occurred. Please try again later.', 'received');
-                }
-            });
-        }
-    });
-});
-
-
-
-
-            function addMessage(message, type) {
-                $('#conversation').append('<div class="message ' + type + ' p-2 mb-2 ' + (type === 'received' ? 'bg-light' : 'bg-primary text-white') + ' rounded">' + message + '</div>');
-                $('#conversation').scrollTop($('#conversation')[0].scrollHeight); 
-            }
-        });
-        $(document).ready(function() {
-    $('#startNewChat').click(function() {
-        location.reload(); // This will reload the page
-    });
-});
-
-
-       $(document).on('click', '.nav-link', function(e) {
-          e.preventDefault();
-         var conversationId = $(this).data('conversation-id');
-        $.ajax({
-           type: 'POST',
-           url: 'fetch_messages.php',
-           data: { conversation_id: conversationId },
-           success: function(response) {
-              $('#conversation').html(response); // Assuming #conversation is your chat display area
-           },
-           error: function() {
-              alert('Failed to fetch messages.');
-          }
-       });
-});
-
-
-// Fetch conversations when page loads
-
-
-// Fetch conversations function
-function fetchConversations() {
-        $.ajax({
-            type: 'POST',
-            url: 'fetch_conversation.php',
-            data: { userId: userId },
-            success: function(data) {
-                var conversations = JSON.parse(data);
-                var $list = $('.nav.flex-column');
-                $list.empty(); // Clear existing entries
-
-                conversations.forEach(function(conv) {
-                    $list.append('<li class="nav-item"><a class="nav-link" href="#" data-conversation-id="' + conv.conversationId + '">' + conv.title + '</a></li>');
                 });
-            },
-            error: function() {
-                alert('Failed to fetch conversations');
-            }
-        });
-    }
 
-    // Handle clicks on conversation links
-    $('.nav.flex-column').on('click', '.nav-link', function(e) {
-        e.preventDefault();
-        currentConversationId = $(this).data('conversation-id');
-        console.log('Current Conversation ID:', currentConversationId);
-        fetchMessages(currentConversationId);
-    });
 
-    function fetchMessages(conversationId) {
-        $.ajax({
-            type: 'POST',
-            url: 'fetch_messages.php',
-            data: { currentConversationId: currentConversationId },
-            success: function(response) {
-                $('#conversation').html(response);
-            },
-            error: function() {
-                alert('Failed to fetch messages.');
-            }
-        });
-    }
+                        $(document).ready(function() {
+            
+
+                $('#searchForm').on('submit', function(e){
+                    e.preventDefault(); // Prevent form from refreshing the page
+                    var searchQuery = $('#searchQuery').val(); // Get the user's query
+
+                    if (searchQuery.length > 1){
+                        $.ajax({
+                            type: 'POST',
+                            url: 'get_answer.php', 
+                            data: { question: searchQuery },
+                            success: function(response){
+                                addMessage(searchQuery, 'sent');
+                                addMessage(response, 'received');
+                                $('#searchQuery').val('');
+
+                                var ajaxUrl = 'save_conversation.php';
+                                var ajaxData = {
+                                    currentConversationId:currentConversationId,
+                                    userId: userId,
+                                    question: searchQuery,
+                                    response: response
+                                };
+
+                                if (firstSend) {
+                                    // If it's the first send, save the conversation
+                                } else {
+                                    ajaxData.conversationId= conversationId; // Use the existing conversation ID
+                                }
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: ajaxUrl,
+                                    data: ajaxData,
+                                    success: function(data) {
+                                        console.log('Interaction saved', data);
+                                        var result = JSON.parse(data);
+                                        if (firstSend) {
+                                            conversationId = result.conversationId; // Store the conversation ID returned from the server
+                                            firstSend = false; // Update the flag after the first send
+                                        }
+                                    },
+                                    error: function(error) {
+                                        console.error('Failed to save interaction', error);
+                                        $('#searchQuery').val('');
+                                    }
+                                });
+                            },
+                            error: function(){
+                                addMessage('An error occurred. Please try again later.', 'received');
+                                $('#searchQuery').val('');
+                            }
+                        });
+                    }
+                });
+            });
+
+
+
+
+                        function addMessage(message, type) {
+                            $('#conversation').append('<div class="message ' + type + ' p-2 mb-2 ' + (type === 'received' ? 'bg-light' : 'bg-primary text-white') + ' rounded">' + message + '</div>');
+                            $('#conversation').scrollTop($('#conversation')[0].scrollHeight); 
+                        }
+                    });
+                    $(document).ready(function() {
+                $('#startNewChat').click(function() {
+                    location.reload(); // This will reload the page
+                });
+            });
+
+
+                $(document).on('click', '.nav-link', function(e) {
+                    e.preventDefault();
+                    var conversationId = $(this).data('conversation-id');
+                    $.ajax({
+                    type: 'POST',
+                    url: 'fetch_messages.php',
+                    data: { conversation_id: conversationId },
+                    success: function(response) {
+                        $('#conversation').html(response); // Assuming #conversation is your chat display area
+                    },
+                    error: function() {
+                        alert('Failed to fetch messages.');
+                    }
+                });
+            });
+
+
+            // Fetch conversations when page loads
+
+
+            // Fetch conversations function
+            function fetchConversations() {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'fetch_conversation.php',
+                        data: { userId: userId },
+                        success: function(data) {
+                            var conversations = JSON.parse(data);
+                            var $list = $('.nav.flex-column');
+                            $list.empty(); // Clear existing entries
+
+                            conversations.forEach(function(conv) {
+                                $list.append('<li class="nav-item"><a class="nav-link" href="#" data-conversation-id="' + conv.conversationId + '">' + conv.title + '</a></li>');
+                            });
+                        },
+                        error: function() {
+                            alert('Failed to fetch conversations');
+                        }
+                    });
+                }
+
+                // Handle clicks on conversation links
+                $('.nav.flex-column').on('click', '.nav-link', function(e) {
+                    e.preventDefault();
+                    currentConversationId = $(this).data('conversation-id');
+                    console.log('Current Conversation ID:', currentConversationId);
+                    fetchMessages(currentConversationId);
+                });
+
+                function fetchMessages(conversationId) {
+                    $.ajax({
+                        type: 'POST',
+                        url: 'fetch_messages.php',
+                        data: { currentConversationId: currentConversationId },
+                        success: function(response) {
+                            $('#conversation').html(response);
+                        },
+                        error: function() {
+                            alert('Failed to fetch messages.');
+                        }
+                    });
+                }
 
 
 
