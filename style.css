@@ -56,3 +56,23 @@
     font-size: 0.75em;
     color: #666;
 }
+#searchForm .input-group {
+    display: flex;
+    align-items: center;
+}
+
+#searchForm .form-control {
+    margin-right: -1px; /* Ensures no gap between the input and the button */
+}
+
+#searchForm .btn {
+    border-radius: 0 0.25rem 0.25rem 0; /* Adjusts border radius to match the input field */
+}
+
+#sendbtn{
+    background-color:#4286f4;
+    color: #E1F5FE;
+    padding: 10px;  
+    height: 10px;  
+
+}

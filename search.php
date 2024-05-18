@@ -1,22 +1,28 @@
 <?php
+require 'vendor/autoload.php';
 
-$jsonData = file_get_contents("translated_data.json");
+$file_path = "questions_departements.csv";
+$handle = fopen($file_path, "r"); // Open the CSV file
 
-$data = json_decode($jsonData, true);
-
-$q = $_GET["search_query"];
-
+$q = $_GET["search_query"]; // Get the search query from the URL parameter
 $hint = "";
 
-foreach ($data as $item) {
-    foreach ($item as $language => $content) {
-         if (strpos(strtolower($content['question']), strtolower($q)) !== false) {
-          $hint .= "<div><a href='#'>" . $content['question'] . "</a></div>"; 
+// Check if file opened successfully
+if ($handle !== FALSE) {
+    // Read each line of the CSV file
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        // Assuming 'question' is in the first column of your CSV
+        $question = $data[0];
+
+        // Search for the query in the 'question' field
+        if (strpos(strtolower($question), strtolower($q)) !== false) {
+            $hint .= "<div><a href='#'>" . htmlspecialchars($question) . "</a></div>";
         }
     }
+    fclose($handle); // Close the file handle
 }
 
-$response = ($hint == "") ? "No suggestion" : $hint;
-
+$response = ($hint === "") ? "No suggestion" : $hint;
 
 echo $response;
+?>

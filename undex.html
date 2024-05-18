@@ -62,8 +62,12 @@
                 <!-- Search and message input area -->
                 <div id="searchContainer" class="mb-4">
                     <form id="searchForm" class="input-group">
-                        <input type="text" id="searchQuery" class="form-control" placeholder="Type your query">
-                        <button type="submit" class="btn btn-primary">Send</button>
+                        <input type="text" id="searchQuery" class="form-control" placeholder="Type your query" >
+                        <div class="input-group-append">
+                     
+                             <button type="submit" id="sendbtn" >Send</button>
+        
+                        </div>
                     </form>
                     <ul class="dropdown list-group mt-2" id="searchResults"></ul>
                 </div>
@@ -80,6 +84,7 @@
        var cin =123645678;
        var firstSend = true; // Flag to check if it's the first send
        var conversationId = null; // To store the conversation ID
+       var departement = 'HR'
 
        $(document).ready(function() {
           fetchConversations();
@@ -126,7 +131,7 @@
                             };
 
                             if (!firstSend) {
-                                ajaxData.conversationId = conversationId; 
+                                ajaxData.currentConversationId = conversationId; 
                             }
 
                             $.ajax({
@@ -183,7 +188,7 @@
                                 } else {
                                     ajaxData.conversationId= conversationId; // Use the existing conversation ID
                                 }
-
+                                
                                 $.ajax({
                                     type: 'POST',
                                     url: ajaxUrl,
@@ -192,7 +197,7 @@
                                         console.log('Interaction saved', data);
                                         var result = JSON.parse(data);
                                         if (firstSend) {
-                                            conversationId = result.conversationId; // Store the conversation ID returned from the server
+                                            currentConversationId = result.conversationId; // Store the conversation ID returned from the server
                                             firstSend = false; // Update the flag after the first send
                                         }
                                     },
@@ -201,6 +206,25 @@
                                         $('#searchQuery').val('');
                                     }
                                 });
+                                $.ajax({
+                                        type: 'POST',
+                                        url: 'save_question.php',
+                                        data: {
+                                            userId: userId,
+                                            username: username,
+                                            question: searchQuery,
+                                            photoUrl: photoUrl,
+                                            currentConversationId: currentConversationId ,
+                                            departement: departement
+                                        },
+                                        success: function(data) {
+                                            alert('Question saved for review!');
+                                            sendEmail(departement);
+                                        },
+                                        error: function() {
+                                            alert('Error saving question.');
+                                        }
+                                    });
                             },
                             error: function(){
                                 addMessage('An error occurred. Please try again later.', 'received');
@@ -289,7 +313,30 @@
                     });
                 }
 
-
+                function sendEmail(department) {
+                    // Define the data to send in the POST request
+                    console.log(department);
+                    const data = {
+                        department: department
+                    };
+                
+                    // Send an AJAX POST request to the PHP script
+                    fetch('send_emails.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        // Handle the response (you can display a message or handle errors)
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
 
 
     </script>
