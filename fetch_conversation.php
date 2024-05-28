@@ -21,4 +21,4 @@ if ($userId !== null && is_dir($directory)) {
 } else {
     echo json_encode([]); // Return an empty array if no user ID or directory
 }
-?>
+

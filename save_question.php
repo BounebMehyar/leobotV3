@@ -6,7 +6,6 @@ $newQuestion = [
     'userId' => $_POST['userId'],
     'username' => $_POST['username'],
     'question' => $_POST['question'],
-    'photoUrl' => $_POST['photoUrl'],
     'conversationId' => $_POST['currentConversationId'],
     'departement' => $_POST['departement']
 ];

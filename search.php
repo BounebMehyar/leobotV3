@@ -2,7 +2,7 @@
 require 'vendor/autoload.php';
 
 $file_path = "questions_departements.csv";
-$handle = fopen($file_path, "r"); // Open the CSV file
+$handle = fopen($file_path, "r"); 
 
 $q = $_GET["search_query"]; // Get the search query from the URL parameter
 $hint = "";
@@ -19,10 +19,9 @@ if ($handle !== FALSE) {
             $hint .= "<div><a href='#'>" . htmlspecialchars($question) . "</a></div>";
         }
     }
-    fclose($handle); // Close the file handle
+    fclose($handle);
 }
 
 $response = ($hint === "") ? "No suggestion" : $hint;
 
 echo $response;
-?>

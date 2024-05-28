@@ -1,22 +1,33 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();  // Start the session to access session variables
+
+$invalidCode = false;  // Flag to track invalid code
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $inputCode = $_POST['verification_code'];  // Code entered by the user
+    $recipientEmail = $_POST['email'];  // Email entered by the user
 
-    if (isset($_SESSION['verification_code']) && $inputCode == $_SESSION['verification_code']) {
+    // Load the codes data
+    $codesFile = 'codes.json';
+    $codesData = file_exists($codesFile) ? json_decode(file_get_contents($codesFile), true) : [];
+
+    foreach ($codesData as $entry) {
+        if ($entry['email'] === $recipientEmail && $entry['code'] == $inputCode) {
             // Correct code, proceed further
+            $_SESSION['verification_code'] = $inputCode; // Store verified code in session
+            $_SESSION['verified_email'] = $recipientEmail; // Store verified email in session
             header("Location: request.php");  // Redirect to main interface
             exit;
-        // Redirect or perform other actions
-    } else {
-        // Code is incorrect
-        echo "Invalid verification code. Please try again.";
+        }
     }
+    // If no match found
+    $invalidCode = true;
 }
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -28,48 +39,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            
-            /* Set the background image */
-            background-image: url('image/background2.jpg'); /* Update 'path_to_your_image.jpg' to the path of your actual image */
-            
-            /* Center the image */
+            background-image: url('image/background2.jpg');
             background-position: center;
-            
-            /* Scale the background to cover the entire container */
             background-size: cover;
-            
-            /* Make the background fixed, so it does not scroll with the content */
             background-attachment: fixed;
-
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Use full height to center vertically */
+            height: 100vh;
             margin: 0;
         }
         .form-container {
             width: 100%;
-            max-width: 400px; /* Maximum width of the form */
+            max-width: 400px;
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* subtle shadow */
-            text-align: center; /* Center-align text */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            background-color: white;
         }
         .logo {
-            margin-bottom: 20px; /* Space below the logo */
+            margin-bottom: 20px;
         }
         .form-control {
-            margin-bottom: 10px; /* spacing between input and button */
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <img src="image\leoni.png" alt="Company Logo" class="logo" width="200" height="100"> <!-- Logo Placeholder -->
+        <img src="image/leoni.png" alt="Company Logo" class="logo" width="200" height="100">
         <h2 class="text-blue" style="color: #4286f4;">Enter Verification Code</h2>
+        <?php if ($invalidCode): ?>
+            <div class="alert alert-danger" role="alert">
+                Invalid verification code. Please try again.
+            </div>
+        <?php endif; ?>
         <form method="post" action="">
-            <input type="text" name="verification_code" class="form-control" placeholder="Enter your 4-digit code here">
-            <input type="submit" value="Verify" class="btn btn-light"> <!-- Use btn-light for contrast -->
+            <input type="email" name="email" class="form-control" placeholder="Enter your email" value="<?php echo isset($recipientEmail) ? htmlspecialchars($recipientEmail) : ''; ?>" required>
+            <input type="text" name="verification_code" class="form-control" placeholder="Enter your 8-character code here" value="<?php echo isset($inputCode) ? htmlspecialchars($inputCode) : ''; ?>" required>
+            <input type="submit" value="Verify" class="btn btn-light">
         </form>
     </div>
 </body>

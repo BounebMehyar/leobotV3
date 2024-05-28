@@ -1,15 +1,26 @@
 <?php
 session_start();
 
-// Function to generate a random 4-digit code
+// Function to generate a random 8-character code
 function generateCode() {
-    return rand(1000, 9999);
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&()';
+    $code = '';
+    for ($i = 0; $i < 8; $i++) {
+        $code .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    return $code;
 }
 
 $bodyContent = file_get_contents('php://input');
 $data = json_decode($bodyContent, true);
-$departmentName = 'HR';  // Example department name
 
+
+if (!isset($data['department'])) {
+    die('Error: Department not specified.');
+}
+
+$departmentName = $data['department'];
+echo $departmentName;
 // Load department emails from a JSON file
 $jsonFile = file_get_contents('emails.json');
 $departmentEmails = json_decode($jsonFile, true);
@@ -18,11 +29,16 @@ if (isset($departmentEmails[$departmentName])) {
     $recipientEmail = $departmentEmails[$departmentName];
     $verificationCode = generateCode();
 
-    // Store the code in a session
-    $_SESSION['verification_code'] = $verificationCode;
-    echo "Verification code set in session: " . $_SESSION['verification_code']; 
-    echo 'Session ID in send_email.php: ' . session_id();
-
+    // Store the code, email, and department in a JSON file
+    $codesFile = 'codes.json';
+    $codesData = file_exists($codesFile) ? json_decode(file_get_contents($codesFile), true) : [];
+    $codesData[] = [
+        'email' => $recipientEmail,
+        'code' => $verificationCode,
+        'timestamp' => time(),
+        'department' => $departmentName
+    ];
+    file_put_contents($codesFile, json_encode($codesData));
 
     $to = $recipientEmail;
     $subject = 'New Question - Verification Required';
@@ -37,4 +53,3 @@ if (isset($departmentEmails[$departmentName])) {
 } else {
     echo 'Department not found';
 }
-
